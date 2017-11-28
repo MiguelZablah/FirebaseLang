@@ -77,7 +77,7 @@
     <style type="text/css">
         .authenticated {
             display: block;
-        }
+        }  
         .unauthenticated {
             display: none;
         }
@@ -136,7 +136,7 @@
                     </button>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
                     <button type="button" class="btn btn-danger btn-eliminar">Eliminar</button>
                 </div>
             </div>
@@ -155,7 +155,7 @@
                 </div>
                 <div class="modal-footer">
                     <div class="pre-auth">
-                        <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Ok</button>
                     </div>
                     <div class="post-auth"></div>
                 </div>
@@ -184,7 +184,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
                     <button type="button" class="btn btn-primary" id="doLogin">Login</button>
                 </div>
             </div>
@@ -208,7 +208,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
                     <button type="button" class="btn btn-primary" id="agregarLang">Agregar</button>
                 </div>
             </div>
@@ -236,7 +236,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
                     <button type="button" class="btn btn-primary" id="agregarKeyValue">Agregar</button>
                 </div>
             </div>
@@ -268,6 +268,7 @@
                 actulizarFirebase(lngSelected, NewBundle);
 
                 //Da confirmacion
+                //Se da confirmacion ya con la funcion que esta checando por cambios
                 //alert("Se actulizado el lenguaje de: " + lngSelected);
             });
 
@@ -308,7 +309,7 @@
                             //Si si se pudo conectar
                             //console.log("Authenticated successfully with payload:", authData);
                             auth = authData;
-                            $('#messageModalLabel').html(spanText('Success!', ['center', 'success']))
+                            $('#messageModalLabel').html(spanText('Success!', ['center', 'success']));
                             setTimeout(function () {
                                 $('#messageModal').modal('hide');
                                 //Ya existe una funcion que esta checando en tiempo real que si este en seccion
@@ -317,7 +318,7 @@
                         .catch(function (error) {
                             //Si no se pudo conectar
                             console.log("Login Failed!", error);
-                            $('#messageModalLabel').html(spanText('ERROR: ' + error.code, ['danger']))
+                            $('#messageModalLabel').html(spanText('ERROR: ' + error.code, ['danger']));
                         });
                 }
             });
@@ -340,7 +341,7 @@
                 } else {
                     //Si no se pudo conectar
                     console.log("Error al subir el idioma");
-                    $('#messageModalLabel').html(spanText('ERROR: error al subir el idioma', ['danger']))
+                    $('#messageModalLabel').html(spanText('ERROR: error al subir el idioma', ['danger']));
                 }
             });
 
@@ -363,7 +364,7 @@
                 } else {
                     //Si no se pudo conectar
                     console.log("Error al subir la variable");
-                    $('#messageModalLabel').html(spanText('ERROR: Error al subir la variable', ['danger']))
+                    $('#messageModalLabel').html(spanText('ERROR: Error al subir la variable', ['danger']));
                 }
             });
 
@@ -371,8 +372,18 @@
             $('#btn-eliminarIdioma').on('click', function (e) {
                 e.preventDefault();
 
-                //Se corre la funcion para eliminar el idioma
-                deleteModal(lngSelected, true);//El true es para decirle que si es un idioma
+                //Si hay un idioma selecionado
+                if (lngSelected != null) {
+                    //Si si
+                    //Se corre la funcion para eliminar el idioma
+                    deleteModal(lngSelected, true);//El true es para decirle que si es un idioma
+                } else {
+                    //Si no
+                    //Se manda un mensaje que tiene que selecionar un idioma
+                    //Muestra el mensaje de si se pudo o no iniciar seccion
+                    $('#messageModalLabel').html(spanText('Error! Selecione un idioma...', ['center', 'warning']))
+                    $('#messageModal').modal('show');
+                }
 
             });
 
