@@ -6,15 +6,6 @@ Una pequeña interface para poder editar el objeto de idiomas que se utiliza en 
 
 Se hizo de esa manera para ser mas sencillo de implementar, se que no es la mejor practica pero en este momento es mas sencillo para mi hacerlo de esta manera.
 
-Se planea separar todo y hacerlo de la manera correcta en un futuro.
-
-## Edicion del firebase Lang
-
-Se seguira agregadon/Editando cosas de este para un futuro.
-
-Se planea agregar una version utilizando cloud firestore.
-
-
 ## Funciones Actuales
 
 1. Editar texto por idioma
@@ -70,8 +61,10 @@ Se planea agregar una version utilizando cloud firestore.
 
 ## Proximamente
 
-Se cambiara el idioma de los comentarios y README.md a ingles.
+-Se cambiara el idioma de los comentarios y README.md a ingles.
 
-Se planea separar el codigo de manera correcta.
+-Se planea separar el codigo de manera correcta.
 
-Actualmente la pagina se tiene que poner en duro, talves sea mejor practica poderlo cambiar?
+-Se seguira agregadon/Editando cosas de este para un futuro.
+
+-Se planea agregar una version utilizando cloud firestore.
