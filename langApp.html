@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Lang Edit</title>
+
+    <!-- JQuery -->
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+    crossorigin="anonymous"></script>
+    <!-- Js Bootstrap -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
+    <!-- Cloud FireStore for Lang -->
+    <script src="https://www.gstatic.com/firebasejs/4.6.0/firebase.js"></script>
+  
+    <!-- CSS Fontawesome -->
+    <script src="https://use.fontawesome.com/ceaa390e68.js"></script>
+    <!-- CSS Bootstrap -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+
+    <script>
+    //Variable con la pagina que se va a editar
+    var basePage = "demoPruebasMiguel";
+
+    // Initialize Cloud FireBase for lang
+    firebase.initializeApp({
+        apiKey: "AIzaSyA5dxS5U33CDrtAuxmnp80RTJzKiAoHC1U",
+        authDomain: "langdigin.firebaseapp.com",
+        databaseURL: "https://langdigin.firebaseio.com",
+        storageBucket: "langdigin.appspot.com"
+    });
+
+    // Iniciaizamos variables y creamos otras para el login
+    var db = firebase.database();
+    var Auth = firebase.auth(); 
+    var auth = null;
+
+    //Creacion de objeto Bundle
+    var bundle = { "en":{}, "es":{}};
+    
+   //Actualizacion en momento real para el idioma en en objecto Bundle
+    var pageData = db.ref(basePage);
+    pageData.on('value', function(snapshot) {
+        bundle = { "en":{}, "es":{}};
+        $.each(snapshot.val(), function(index, element) {
+            
+            //Se agregan los elementos con su index
+            bundle[index] = element;
+            
+            //Se modifican los inputs si es que cambian
+            fillInputs(lngSelected); 
+            //Se llena el select con los idiomas
+            if(userExist){
+                deleteSelect();
+            }
+            fillSelect();
+        });
+    });
+
+    //Si el usuario ya existe se mantiene logIn
+    var userExist = false;
+    Auth.onAuthStateChanged(function(user) {
+        window.user = user; // user is undefined if no user signed in
+        if(user){
+            //Desplega la informacion para el usuario existente
+            $('.unauthenticated, .userAuth').toggleClass('unauthenticated').toggleClass('authenticated');
+            //console.log("jalo?");
+            userExist = true;
+        }
+    });
+
+    </script>
+
+    <style type="text/css">
+        .btnLogOut{ display: block;margin-top: 14px;}
+        .btnLogIn{ display: block;margin-top: 10px;}
+        .unauthenticated{display: none;}
+        .modal-header:last-child{border-bottom: 0;}
+    </style>
+ 
+</head>
+<body>
+
+<div class="container">
+    <span class="userAuth authenticated pull-right btnLogIn">
+        <button type="button" class="btn btn-success" data-toggle="modal" data-target="#loginModal">Login</button>
+    </span>
+    <span class="unauthenticated pull-right btnLogOut">
+        <button type="button" class="btn btn-danger unauthenticated" id="signOut">Log Out</button>
+    </span>
+    <h1>Configuracion del lang</h1>
+    <hr>
+    <div class="unauthenticated">
+        <div class="row">
+            <div class="col-md-12">
+                <h1>Form</h1>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <button href="javascript:void(0)" type="button" class="btn btn-primary" id="btnUpload">Subir Cambios</button>
+                <button type="button" class="btn btn-warning" data-toggle="modal" data-target="#addLangModal" style="float: right;">Agregar Idioma</button>
+                <button type="button" class="btn btn-info" data-toggle="modal" data-target="#addKeyValueModal" style="float: right;margin-right: 5px;">Agregar Variable</button>
+            </div>
+        </div>
+        <div class="row" style="padding-top:20px;">
+            <div class="col-md-12 form-group">
+                <label>Selecione un Idioma</label>
+                <select id="selectLang" class="form-control">
+                    <option></option>
+                </select>
+            </div>
+        </div>
+        <form class="container row" id="formContainer">
+        </form>
+    </div>
+</div>
+
+<!-- Modal para mensajes -->
+<div class="modal fade" id="messageModal" tabindex="-1" role="dialog" aria-labelledby="Message" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="messageModalLabel">Message</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-footer">
+                <div class="pre-auth">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+                <div class="post-auth"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para el inicio de secion -->
+<div class="modal fade" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="Login" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="loginModalLabel">Login</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="recipient-name" class="control-label">Email:</label>
+                    <input type="text" class="form-control" id="loginEmail">
+                </div>
+                <div class="form-group">
+                    <label for="message-text" class="control-label">Password:</label>
+                    <input type="password" class="form-control" id="loginPassword">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="doLogin">Login</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para el agregar idioma -->
+<div class="modal fade" id="addLangModal" tabindex="-1" role="dialog" aria-labelledby="Agregar Idioma" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="addLangModalLabel">Agregar Idioma</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="recipient-name" class="control-label">Nuevo idioma:</label>
+                    <input type="text" class="form-control" id="newLang">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="agregarLang">Agregar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para agregar un nuevo key y value -->
+<div class="modal fade" id="addKeyValueModal" tabindex="-1" role="dialog" aria-labelledby="Login" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyValueLabel">Agregar una variable nueva</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="recipient-name" class="control-label">key:</label>
+                    <input type="text" class="form-control" id="newkey">
+                </div>
+                <div class="form-group">
+                    <label for="message-text" class="control-label">Value:</label>
+                    <input type="text" class="form-control" id="newValue" value="xxx">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="agregarKeyValue">Agregar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    //Variables de nombre de idiomas en base de datos
+    var lngSelected;
+    
+    $(document).ready(function() {
+
+        //Cuando cambia el idioma selecionado cambia los inputs y la variable
+         $('#selectLang').change(function () {
+            lngSelected = $('#selectLang').val();
+            fillInputs(lngSelected);
+            $('#formContainer').show();
+        });
+
+        //Cuando le des click al btn se actuliza firebase
+        $("#btnUpload").click(function(e) {
+            e.preventDefault();
+            
+            //Se guarda el areglo de los inputs
+            var NewBundle = getData();
+
+            //Actulizar firebase 
+            actulizarFirebase(lngSelected, NewBundle);
+
+            //Da confirmacion
+            //alert("Se actulizado el lenguaje de: " + lngSelected);
+        });
+
+        //Para cerrar secion
+        $("#signOut").click(function(e) {
+            e.preventDefault();
+
+           firebase.auth().signOut().then(function() {
+                // Sign-out successful.
+            }, function(error) {
+                // An error happened.
+            });
+            
+            //Redeciona a la pagina de login
+            document.location.href="/home/getview/lang";
+        });
+
+        //Para iniciar seccion
+        $('#doLogin').on('click', function (e) {
+            e.preventDefault();
+
+            //Se esconde el modal cuando le das click a login
+            $('#loginModal').modal('hide');
+            //Muestra el mensaje de si se pudo o no iniciar seccion
+            $('#messageModalLabel').html(spanText('<i class="fa fa-cog fa-spin"></i>', ['center', 'info']));
+            $('#messageModal').modal('show');
+
+            //Se valida que se ingreso informacion a el correo y pass
+            if( $('#loginEmail').val() != '' && $('#loginPassword').val() != '' ){
+                //se almacena la infomarcion
+                var data = {
+                    email: $('#loginEmail').val(),
+                    password: $('#loginPassword').val()
+                };
+                //Se manda a firebase para authenticarlo
+                firebase.auth().signInWithEmailAndPassword(data.email, data.password)
+                    .then(function(authData) {
+                    //Si si se pudo conectar
+                        //console.log("Authenticated successfully with payload:", authData);
+                        auth = authData;
+                        $('#messageModalLabel').html(spanText('Success!', ['center', 'success']))
+                        setTimeout(function () {
+                            $('#messageModal').modal('hide');
+                            //Ya existe una funcion que esta checando en tiempo real que si este en seccion
+                        }, 500);
+                    })
+                    .catch(function(error) {
+                    //Si no se pudo conectar
+                        console.log("Login Failed!", error);
+                        $('#messageModalLabel').html(spanText('ERROR: '+error.code, ['danger']))
+                    });
+            }
+        });
+
+        //Para agregar idioma
+        $('#agregarLang').on('click', function (e) {
+            e.preventDefault();
+
+            //Se esconde el modal cuando le das click a login
+            $('#addLangModal').modal('hide');
+
+            //Se valida que se ingreso informacion a el correo y pass
+            if( $('#newLang').val() != '' ){
+                //se almacena la infomarcion
+                var nuevoIdioma = $('#newLang').val();
+                setTimeout(function () {
+                    //Se agregar el idioma y se copia la info de el de en
+                    agregarIdiomaFirebase(nuevoIdioma);
+                }, 500);
+            }else{
+                //Si no se pudo conectar
+                console.log("Error al subir el idioma");
+                $('#messageModalLabel').html(spanText('ERROR: error al subir el idioma', ['danger']))
+            }
+        });
+
+        //Para agregar idioma
+        $('#agregarKeyValue').on('click', function (e) {
+            e.preventDefault();
+
+            //Se esconde el modal cuando le das click a login
+            $('#addKeyValueModal').modal('hide');
+
+            //Se valida que se ingreso informacion a el correo y pass
+            if( $('#newkey').val() != '' && $('#newValue').val() != '' ){
+                //se almacena la infomarcion
+                var key = $('#newkey').val();
+                var val = $('#newValue').val();
+                setTimeout(function () {
+                    //Se agregar el idioma y se copia la info de el de en
+                    agregarVariableFirebase(key, val);
+                }, 500);
+            }else{
+                //Si no se pudo conectar
+                console.log("Error al subir la variable");
+                $('#messageModalLabel').html(spanText('ERROR: Error al subir la variable', ['danger']))
+            }
+        });
+
+    });
+
+
+    //Crea spans para desplegar mensajes
+    function spanText(textStr, textClasses) {
+        var classNames = textClasses.map(c => 'text-'+c).join(' ');
+        return '<span class="'+classNames+'">'+ textStr + '</span>';
+    }
+
+    //Llean el select con las opciones de idioma
+    function fillSelect(){
+
+        //Se guarda el objeto en una nueva variable
+        var array = bundle;
+        // Variable para identificar la primera vuelta
+        var firstRun = true;
+        // Primer input para forzar al usaurio a selecionar una opcion
+        var blankOption = '<option disabled selected value>' + '-- select an option --' + '</option>';
+        //Se lee las primeras llaves del objecto bundle que en este caso son los idiomas
+        $('#selectLang').html($.map(array, function (val, key) {
+            //Se hace un if para agregar el input disable solo en la primera vuelta
+            if(firstRun){
+                firstRun = false;
+                return blankOption + '<option value="' + key + '">' + key + '</option>';
+            }
+            return '<option value="' + key + '">' + key + '</option>';
+            
+        }).join(''));
+
+    }
+
+    //Funcion para borrar select y actulizacion
+    function deleteSelect(){
+        //Para cuando se actulize la base de datos sepas
+        //Se muestra un modal
+        $('#messageModal').modal('show');
+        $('#messageModalLabel').html(spanText('Base de datos actulizada', ['center', 'success']))
+        //Borra todo el select
+        $('#selectLang').find('option').remove().end();
+        //Se esconde el form
+        $('#formContainer').hide();
+
+        //Empieza time out
+        setTimeout(function () {
+            //Esconde el modal
+            $('#messageModal').modal('hide');
+        }, 800);//Fin Timeout
+    }
+    //Toma todos los input con su valor y los mete en un objecto
+    //Esto para luego actulizar la base de datos
+    function getData() {
+        var newBundle = [];
+
+        $("form#formContainer :input").each(function(){
+            var input = $(this);
+            var key = input.attr('id');
+            var keyValue = input.val();
+            newBundle[key] = keyValue;
+        });
+
+        console.log(newBundle);
+        return newBundle;
+    }
+
+    //Funcion para actulizacion el idioma de  firebase
+    function actulizarFirebase(language, newInfo){
+        var refIndex = basePage + "/" + language;
+        db.ref(refIndex)
+        .set(newInfo);
+    }
+
+    //Funcion para agregar un idioma al firebase
+    function agregarIdiomaFirebase(language){
+        var refIndex = basePage + "/" + language;
+        db.ref(refIndex)
+        .set(bundle.en);
+    }
+
+    //Funcion para agregar elementos al firebase
+    function agregarVariableFirebase(keyVal, val){
+        var refIndex = basePage + "/";
+        //Recorre todas las llaves de firebase
+        Object.keys(bundle).forEach(function (key) {
+           db.ref(refIndex + key).update({[keyVal] : val});
+        });
+        
+    }
+
+    //Funcion para borrar un elemento de firebase
+    function deleteElement(keyValue){
+        var refIndex = basePage + "/";
+        Object.keys(bundle).forEach(function (key) {
+           db.ref(refIndex + key).child(keyValue).remove();
+        });
+    }
+
+    //Cambia los inputs por otros
+    function fillInputs(lng){
+
+        //Borra todo el form
+        $('#formContainer')[0].reset();
+
+        //Pone en la variable la parte del objecto a generar
+        var arr = bundle[lng];
+
+        //Vuelvea a crear el form
+        $.each(arr, function(key, value) {
+            //display the key and value pair
+           addInput(key, value);
+        });
+    }
+
+    // Crea los inputs del form
+    function addInput(key, keyValue){
+        //Para la actulizacion en tiempo real de los inputs, evita tambien que se dupliquen
+        if(document.getElementById(key)){
+            document.getElementById(key).value = keyValue;
+        }else{
+            // Create Input viejo (Ya no se usa)
+            var $input = $('<input />', {
+                addClass: "form-control",
+                type : "text",
+                name : key,
+                id: key,
+                value : keyValue,
+                append: "<span class='input-group-btn'><button class='btn btn-secondary' type='button'>Borrar</button></span>"
+            });
+
+            //Create label viejo (Ya no se usa)
+            $("<label />", {
+                addClass: "",
+                for: key,
+                id: key,
+                //appendTo: "#formContainer",
+                append: [key + ": "]
+            }).wrap( "<div class='form-group col-md-6'></div>" );
+
+            //Crea cada form group con todo y su label
+            $('#formContainer').append( "<div class='form-group col-md-6'>"+
+                    "<label for='"+key+"' id="+ key +">"+ key + ": " + "</label>"+
+                    "<div class='input-group'>"+
+                        "<input class='form-control' type='text' id="+ key +" name="+ key +" value="+ keyValue +"></input>"+
+                        "<span class='input-group-btn'>"+
+                            "<button id="+ key +" class='btn btn-danger' type='button' onClick='deleteElement(this.id);' >"+
+                                "Borrar"+
+                            "</button>"+
+                        "</span>"+
+                    "</div>"+
+                "</div>" );
+        }
+    }
+
+</script>
+
+<!-- JS -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+
+</body>
+</html>
