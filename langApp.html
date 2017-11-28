@@ -21,7 +21,7 @@
         crossorigin="anonymous">
 
     <script>
-        
+
         //Variable con la pagina que se va a editar
         var basePage = "demoPruebasMiguel";
 
@@ -104,19 +104,19 @@
             </div>
             <div class="row">
                 <div class="col-md-12">
-                    <button href="javascript:void(0)" type="button" class="btn btn-primary" id="btnUpload">Subir Cambios</button>
-                    <button type="button" class="btn btn-warning float-right" data-toggle="modal" data-target="#addLangModal">Agregar Idioma</button>
-                    <button type="button" class="btn btn-info float-right mr-1" data-toggle="modal" data-target="#addKeyValueModal">Agregar Variable</button>
+                    <button href="javascript:void(0)" type="button" class="btn btn-primary mb-1 mt-1" id="btnUpload">Subir Cambios</button>
+                    <button type="button" class="btn btn-warning mb-1 mt-1 ml-1 float-md-right" data-toggle="modal" data-target="#addLangModal">Agregar Idioma</button>
+                    <button type="button" class="btn btn-info float-md-right mb-1 mt-1" data-toggle="modal" data-target="#addKeyValueModal">Agregar Variable</button>
                 </div>
             </div>
             <div class="row pt-3">
                 <div class="col-md-12 form-group">
                     <label>Selecione un Idioma</label>
                     <div class="form-inline">
-                        <select id="selectLang" class="form-control col-8">
+                        <select id="selectLang" class="form-control col-md-8 mb-1">
                             <option></option>
                         </select>
-                        <button type="button" class="col-2 offset-md-2 btn btn-danger" id="btn-eliminarIdioma">Eliminar Idioma</button>
+                        <button type="button" class="col-md-3 offset-md-1 btn btn-danger" id="btn-eliminarIdioma">Eliminar Idioma</button>
                     </div>
                 </div>
             </div>
@@ -622,7 +622,7 @@
                 // Se crea el wrapper de todo el form group
                 // y se agregar todo el contenido
                 $("<div />", {
-                    addClass: "form-group col-6",
+                    addClass: "form-group col-md-6",
                     id: key,
                     append: [label, divInput],
                     appendTo: "#formContainer"
